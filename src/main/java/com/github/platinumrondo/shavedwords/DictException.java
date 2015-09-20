@@ -5,14 +5,14 @@ package com.github.platinumrondo.shavedwords;
  * command sent or cannot handle our requests for whatever reason.
  */
 public class DictException extends RuntimeException {
-    private final String serverMessage;
+    private final StatusResponse serverMessage;
 
-    public DictException(String result) {
+    public DictException(StatusResponse result) {
         this.serverMessage = result;
     }
 
     @Override
     public String toString() {
-        return serverMessage;
+        return serverMessage.toString();
     }
 }
