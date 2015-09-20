@@ -1,7 +1,7 @@
 package com.github.platinumrondo.shavedwords;
 
 /**
- * Created by rondo on 20/09/15.
+ * Helper class that split the response code from whatever follow that.
  */
 public class StatusResponse {
     private final int code;
@@ -9,7 +9,10 @@ public class StatusResponse {
 
     public StatusResponse(String str) {
         code = Integer.decode(str.substring(0, 3));
-        message = str.substring(4);
+        if (str.length() > 3)
+            message = str.substring(4);
+        else
+            message = "";
     }
 
     public int getCode() {
@@ -22,10 +25,6 @@ public class StatusResponse {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(code);
-        sb.append(" ");
-        sb.append(message);
-        return sb.toString();
+        return String.valueOf(code) + " " + message;
     }
 }
