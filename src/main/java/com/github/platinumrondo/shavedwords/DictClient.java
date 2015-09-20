@@ -1,7 +1,5 @@
 package com.github.platinumrondo.shavedwords;
 
-import com.sun.xml.internal.ws.api.message.Packet;
-
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
