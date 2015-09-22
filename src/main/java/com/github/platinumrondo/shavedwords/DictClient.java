@@ -21,8 +21,6 @@ public class DictClient {
     private BufferedWriter serverOut;
 
     public DictClient(String serverName, int port) {
-        if (serverName == null || serverName.compareTo("") == 0)
-            throw new IllegalArgumentException();
         this.serverName = serverName;
         this.serverPort = port;
     }
