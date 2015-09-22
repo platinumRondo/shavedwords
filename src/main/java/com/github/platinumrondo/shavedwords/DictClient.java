@@ -169,15 +169,13 @@ public class DictClient {
     }
 
     private void sendCommand(String cmd, String... params) throws IOException {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append(cmd);
+        serverOut.write(cmd);
         for (String param : params) {
-            buffer.append(" ");
-            buffer.append(param);
+            serverOut.write(" ");
+            serverOut.write(param);
         }
-        buffer.append((char) 13);
-        buffer.append((char) 10);
-        serverOut.write(buffer.toString(), 0, buffer.length());
+        serverOut.write(13);
+        serverOut.write(10);
         serverOut.flush();
     }
 
