@@ -32,13 +32,19 @@ public class DictClient {
         System.out.println(readStatusResponse());
     }
 
-    private boolean isConnected() {
-        return serverSocket != null && serverSocket.isConnected();
+    public boolean isConnected() {
+        return serverSocket != null && serverSocket.isConnected() && !serverSocket.isClosed();
+    }
+
+    private void checkAndConnect() throws IOException {
+        if (!isConnected())
+            connect();
     }
 
     public String[] define(String database, String word) throws IOException {
         if (database == null || word == null)
             throw new IllegalArgumentException();
+        checkAndConnect();
         sendCommand("define", database, word);
         StatusResponse result = readStatusResponse();
         if (result.getCode() == 150) {
@@ -51,6 +57,7 @@ public class DictClient {
     }
 
     private String[] getDefinitions() throws IOException {
+        checkAndConnect();
         List<String> l = new ArrayList<>();
         StatusResponse result = readStatusResponse();
         while (result.getCode() != 250) {
@@ -62,6 +69,9 @@ public class DictClient {
     }
 
     public String match(String database, String strategy, String word) throws IOException {
+        if (database == null || strategy == null || word == null)
+            throw new IllegalArgumentException();
+        checkAndConnect();
         sendCommand("match", database, strategy, word);
         StatusResponse result = readStatusResponse();
         if (result.getCode() == 152) {
@@ -78,7 +88,7 @@ public class DictClient {
     }
 
     public String showDatabases() throws IOException {
-        //TODO test if connected
+        checkAndConnect();
         //TODO find better way to return dict with its own description
         sendCommand("show db");
         StatusResponse result = readStatusResponse();
@@ -93,6 +103,7 @@ public class DictClient {
     }
 
     public String showStrategies() throws IOException {
+        checkAndConnect();
         //TODO find better way to return this
         sendCommand("show strat");
         StatusResponse result = readStatusResponse();
@@ -108,6 +119,7 @@ public class DictClient {
     public String showInfo(String database) throws IOException {
         if (database == null || database.trim().compareTo("") == 0)
             throw new IllegalArgumentException();
+        checkAndConnect();
         sendCommand("show info", database);
         StatusResponse result = readStatusResponse();
         if (result.getCode() == 112) {
@@ -120,6 +132,7 @@ public class DictClient {
     }
 
     public String showServer() throws IOException {
+        checkAndConnect();
         sendCommand("show server");
         StatusResponse result = readStatusResponse();
         if (result.getCode() == 110)
@@ -130,6 +143,7 @@ public class DictClient {
     public void client(String text) throws IOException {
         if (text == null || text.trim().compareTo("") == 0)
             throw new IllegalArgumentException();
+        checkAndConnect();
         sendCommand("client", text);
         StatusResponse result = readStatusResponse();
         if (result.getCode() != 250)
@@ -137,12 +151,14 @@ public class DictClient {
     }
 
     public String status() throws IOException {
+        checkAndConnect();
         sendCommand("status");
         StatusResponse result = readStatusResponse();
         return result.getMessage();
     }
 
     public String help() throws IOException {
+        checkAndConnect();
         sendCommand("help");
         StatusResponse result = readStatusResponse();
         if (result.getCode() == 113) {
@@ -154,6 +170,7 @@ public class DictClient {
     }
 
     public void auth(String username, String authstring) throws IOException {
+        checkAndConnect();
         sendCommand("auth", username, authstring);
         StatusResponse result = readStatusResponse();
         if (result.getCode() == 230)
@@ -162,6 +179,7 @@ public class DictClient {
     }
 
     public void quit() throws IOException {
+        checkAndConnect();
         sendCommand("quit");
         StatusResponse result = readStatusResponse();
         System.out.println(result);
