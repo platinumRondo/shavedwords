@@ -71,13 +71,13 @@ public class DictGui extends JFrame {
         }
         //send search
         cardLayout.show(contentPanel, "loading");
-        new Searcher(text).execute();
+        new DefineSearch(text).execute();
     }
 
-    private class Searcher extends SwingWorker<String[], Void> {
+    private class DefineSearch extends SwingWorker<String[], Void> {
         private final String word;
 
-        public Searcher(String txt) {
+        public DefineSearch(String txt) {
             super();
             this.word = txt;
         }
@@ -85,7 +85,6 @@ public class DictGui extends JFrame {
         @Override
         protected String[] doInBackground() throws Exception {
             DictClient dc = new DictClient("dict.org", 2628);
-            dc.connect();
             dc.client("shavedwords");
             String[] definition = dc.define("*", word);
             dc.quit();
@@ -97,11 +96,50 @@ public class DictGui extends JFrame {
             try {
                 //TODO if empty go with match query
                 String[] strs = get();
-                defineCard.setContent(strs);
+                if (strs.length == 0) {
+                    System.out.println("DefineSearch: no results...");
+                    new MatchSearch(word).execute();
+                } else {
+                    defineCard.setContent(strs);
+                    cardLayout.show(contentPanel, "define");
+                    searchField.getAction().setEnabled(true);
+                }
             } catch (Exception e) {
+                //TODO get jframe reference for this dialog
                 JOptionPane.showMessageDialog(null, e.getMessage());
+                searchField.getAction().setEnabled(true);
             }
-            cardLayout.show(contentPanel, "define");
+        }
+    }
+
+    private class MatchSearch extends SwingWorker<String[], Void> {
+        private final String word;
+
+        public MatchSearch(String txt) {
+            super();
+            this.word = txt;
+        }
+
+        @Override
+        protected String[] doInBackground() throws Exception {
+            DictClient dc = new DictClient("dict.org", 2628);
+            dc.client("shavedwords");
+            String match = dc.match("*", "prefix", word);
+            dc.quit();
+            return match.split("\n");
+        }
+
+        @Override
+        protected void done() {
+            try {
+                String[] matchLines = get();
+                matchCard.setList(matchLines);
+                cardLayout.show(contentPanel, "match");
+            } catch (Exception e) {
+                //TODO get jframe reference for this dialog
+                JOptionPane.showMessageDialog(null, e.getMessage());
+
+            }
             searchField.getAction().setEnabled(true);
         }
     }
