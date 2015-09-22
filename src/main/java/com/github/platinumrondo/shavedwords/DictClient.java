@@ -23,8 +23,6 @@ public class DictClient {
     public DictClient(String serverName, int port) {
         if (serverName == null || serverName.compareTo("") == 0)
             throw new IllegalArgumentException();
-        if (port < 0 || port > 65535)
-            throw new IndexOutOfBoundsException();
         this.serverName = serverName;
         this.serverPort = port;
     }
@@ -34,6 +32,10 @@ public class DictClient {
         serverIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream(), StandardCharsets.UTF_8));
         serverOut = new BufferedWriter(new OutputStreamWriter(serverSocket.getOutputStream(), StandardCharsets.UTF_8));
         System.out.println(readStatusResponse());
+    }
+
+    private boolean isConnected() {
+        return serverSocket != null && serverSocket.isConnected();
     }
 
     public String[] define(String database, String word) throws IOException {
