@@ -98,7 +98,7 @@ public class DictGui extends JFrame {
         }
         //send search
         cardLayout.show(contentPanel, LOADING_CARD);
-        new DefineSearch(text).execute();
+        new DefineSearch(this, text).execute();
     }
 
     private void connectToServerIfNecessary() throws IOException {
@@ -112,9 +112,11 @@ public class DictGui extends JFrame {
 
     private class DefineSearch extends SwingWorker<String[], Void> {
         private final String word;
+        private final Component cmp;
 
-        public DefineSearch(String txt) {
+        public DefineSearch(Component cmp, String txt) {
             super();
+            this.cmp = cmp;
             this.word = txt;
         }
 
@@ -131,7 +133,7 @@ public class DictGui extends JFrame {
                 String[] strs = get();
                 if (strs.length == 0) {
                     System.out.println("DefineSearch: no results...");
-                    new MatchSearch(word).execute();
+                    new MatchSearch(cmp, word).execute();
                 } else {
                     defineCard.setContent(strs);
                     cardLayout.show(contentPanel, DEFINE_CARD);
@@ -139,8 +141,7 @@ public class DictGui extends JFrame {
                     searchField.getAction().setEnabled(true);
                 }
             } catch (Exception e) {
-                //TODO get jframe reference for this dialog
-                JOptionPane.showMessageDialog(null, e.getMessage());
+                JOptionPane.showMessageDialog(cmp, e.getMessage());
                 closeEnabled = true;
                 cardLayout.show(contentPanel, DEFINE_CARD);
                 searchField.getAction().setEnabled(true);
@@ -150,9 +151,11 @@ public class DictGui extends JFrame {
 
     private class MatchSearch extends SwingWorker<String[], Void> {
         private final String word;
+        private final Component cmp;
 
-        public MatchSearch(String txt) {
+        public MatchSearch(Component cmp, String txt) {
             super();
+            this.cmp = cmp;
             this.word = txt;
         }
 
@@ -171,8 +174,7 @@ public class DictGui extends JFrame {
                 matchCard.setList(matchLines);
                 cardLayout.show(contentPanel, MATCH_CARD);
             } catch (Exception e) {
-                //TODO get jframe reference for this dialog
-                JOptionPane.showMessageDialog(null, e.getMessage());
+                JOptionPane.showMessageDialog(cmp, e.getMessage());
 
             }
             closeEnabled = true;
