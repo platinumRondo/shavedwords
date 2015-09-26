@@ -127,7 +127,6 @@ public class DictClient {
             readStatusResponse();
             return info;
         }
-        //TODO 550 no database found
         throw new DictException(result);
     }
 
@@ -190,11 +189,17 @@ public class DictClient {
         serverOut.write(cmd);
         for (String param : params) {
             serverOut.write(" ");
-            serverOut.write(param);
+            serverOut.write(escapeString(param));
         }
         serverOut.write(13);
         serverOut.write(10);
         serverOut.flush();
+    }
+
+    private String escapeString(String str) {
+        if (str.contains(" "))
+            return '"' + str + '"';
+        return str;
     }
 
     private StatusResponse readStatusResponse() throws IOException {
