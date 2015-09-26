@@ -123,9 +123,17 @@ public class DictClient {
         Map<String, String> map = new HashMap<>();
         for (String line : lines) {
             String[] parts = line.split(" ", 2);
-            map.put(parts[0], parts[1]);
+            map.put(parts[0], removeDoubleQuotes(parts[1]));
         }
         return map;
+    }
+
+    private String removeDoubleQuotes(String s) {
+        if (s.charAt(0) == '"')
+            s = s.substring(1);
+        if (s.charAt(s.length() - 1) == '"')
+            s = s.substring(0, s.length() - 1);
+        return s;
     }
 
     public String showInfo(String database) throws IOException {
