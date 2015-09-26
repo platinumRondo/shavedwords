@@ -24,15 +24,19 @@ public class DictGui extends JFrame {
     private MatchCard matchCard;
     //dict client
     private DictClient client;
+    private boolean closeEnabled;
 
     public DictGui() {
         initComponents();
         setSize(500, 400);
         setTitle("shavedwords");
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        closeEnabled = true;
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                if (!closeEnabled)
+                    return;
                 e.getWindow().setVisible(false);
                 try {
                     if (client != null && client.isConnected())
@@ -113,6 +117,7 @@ public class DictGui extends JFrame {
 
         @Override
         protected String[] doInBackground() throws Exception {
+            closeEnabled = false;
             connectToServerIfNecessary();
             return client.define("*", word);
         }
@@ -128,11 +133,13 @@ public class DictGui extends JFrame {
                 } else {
                     defineCard.setContent(strs);
                     cardLayout.show(contentPanel, "define");
+                    closeEnabled = true;
                     searchField.getAction().setEnabled(true);
                 }
             } catch (Exception e) {
                 //TODO get jframe reference for this dialog
                 JOptionPane.showMessageDialog(null, e.getMessage());
+                closeEnabled = true;
                 searchField.getAction().setEnabled(true);
             }
         }
@@ -148,6 +155,7 @@ public class DictGui extends JFrame {
 
         @Override
         protected String[] doInBackground() throws Exception {
+            closeEnabled = false;
             connectToServerIfNecessary();
             String match = client.match("*", "prefix", word);
             return match.split("\n");
@@ -164,6 +172,7 @@ public class DictGui extends JFrame {
                 JOptionPane.showMessageDialog(null, e.getMessage());
 
             }
+            closeEnabled = true;
             searchField.getAction().setEnabled(true);
         }
     }
