@@ -125,7 +125,6 @@ public class DictGui extends JFrame {
         @Override
         protected void done() {
             try {
-                //TODO if empty go with match query
                 String[] strs = get();
                 if (strs.length == 0) {
                     System.out.println("DefineSearch: no results...");
