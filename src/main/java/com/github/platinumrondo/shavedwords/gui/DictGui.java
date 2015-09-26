@@ -16,6 +16,10 @@ import java.io.IOException;
  * The main gui/app.
  */
 public class DictGui extends JFrame {
+    private static final String LOADING_CARD = "loading";
+    private static final String DEFINE_CARD = "define";
+    private static final String MATCH_CARD = "match";
+
     private JTextField searchField;
     private JPanel contentPanel;
     private CardLayout cardLayout;
@@ -73,16 +77,15 @@ public class DictGui extends JFrame {
         c.fill = GridBagConstraints.BOTH;
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
-        LoadingCard loadingCard = new LoadingCard();
-        contentPanel.add(loadingCard);
-        cardLayout.addLayoutComponent(loadingCard, "loading");
         defineCard = new DefineCard();
         contentPanel.add(defineCard);
-        cardLayout.addLayoutComponent(defineCard, "define");
+        cardLayout.addLayoutComponent(defineCard, DEFINE_CARD);
+        LoadingCard loadingCard = new LoadingCard();
+        contentPanel.add(loadingCard);
+        cardLayout.addLayoutComponent(loadingCard, LOADING_CARD);
         matchCard = new MatchCard();
         contentPanel.add(matchCard);
-        cardLayout.addLayoutComponent(matchCard, "match");
-        cardLayout.show(contentPanel, "define");
+        cardLayout.addLayoutComponent(matchCard, MATCH_CARD);
         add(contentPanel, c);
     }
 
@@ -94,7 +97,7 @@ public class DictGui extends JFrame {
             return;
         }
         //send search
-        cardLayout.show(contentPanel, "loading");
+        cardLayout.show(contentPanel, LOADING_CARD);
         new DefineSearch(text).execute();
     }
 
@@ -131,7 +134,7 @@ public class DictGui extends JFrame {
                     new MatchSearch(word).execute();
                 } else {
                     defineCard.setContent(strs);
-                    cardLayout.show(contentPanel, "define");
+                    cardLayout.show(contentPanel, DEFINE_CARD);
                     closeEnabled = true;
                     searchField.getAction().setEnabled(true);
                 }
@@ -139,6 +142,7 @@ public class DictGui extends JFrame {
                 //TODO get jframe reference for this dialog
                 JOptionPane.showMessageDialog(null, e.getMessage());
                 closeEnabled = true;
+                cardLayout.show(contentPanel, DEFINE_CARD);
                 searchField.getAction().setEnabled(true);
             }
         }
@@ -165,13 +169,14 @@ public class DictGui extends JFrame {
             try {
                 String[] matchLines = get();
                 matchCard.setList(matchLines);
-                cardLayout.show(contentPanel, "match");
+                cardLayout.show(contentPanel, MATCH_CARD);
             } catch (Exception e) {
                 //TODO get jframe reference for this dialog
                 JOptionPane.showMessageDialog(null, e.getMessage());
 
             }
             closeEnabled = true;
+            cardLayout.show(contentPanel, MATCH_CARD);
             searchField.getAction().setEnabled(true);
         }
     }
