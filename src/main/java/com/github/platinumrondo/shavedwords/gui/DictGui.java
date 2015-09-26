@@ -8,6 +8,9 @@ import com.github.platinumrondo.shavedwords.gui.cards.MatchCard;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 /**
  * The main gui/app.
@@ -19,12 +22,29 @@ public class DictGui extends JFrame {
     //CARD s
     private DefineCard defineCard;
     private MatchCard matchCard;
+    //dict client
+    private DictClient client;
 
     public DictGui() {
         initComponents();
         setSize(500, 400);
         setTitle("shavedwords");
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                e.getWindow().setVisible(false);
+                try {
+                    if (client != null && client.isConnected())
+                        client.quit();
+                } catch (IOException ex) {
+                    //TODO bad practice!
+                    System.err.println(ex);
+                }
+                e.getWindow().dispose();
+            }
+        });
+        client = new DictClient("dict.org", 2628);
     }
 
     private void initComponents() {
@@ -74,6 +94,15 @@ public class DictGui extends JFrame {
         new DefineSearch(text).execute();
     }
 
+    private void connectToServerIfNecessary() throws IOException {
+        if (client == null)
+            client = new DictClient("dict.org", 2628);
+        if (!client.isConnected()) {
+            client.connect();
+            client.client("shavedwords");
+        }
+    }
+
     private class DefineSearch extends SwingWorker<String[], Void> {
         private final String word;
 
@@ -84,11 +113,8 @@ public class DictGui extends JFrame {
 
         @Override
         protected String[] doInBackground() throws Exception {
-            DictClient dc = new DictClient("dict.org", 2628);
-            dc.client("shavedwords");
-            String[] definition = dc.define("*", word);
-            dc.quit();
-            return definition;
+            connectToServerIfNecessary();
+            return client.define("*", word);
         }
 
         @Override
@@ -122,10 +148,8 @@ public class DictGui extends JFrame {
 
         @Override
         protected String[] doInBackground() throws Exception {
-            DictClient dc = new DictClient("dict.org", 2628);
-            dc.client("shavedwords");
-            String match = dc.match("*", "prefix", word);
-            dc.quit();
+            connectToServerIfNecessary();
+            String match = client.match("*", "prefix", word);
             return match.split("\n");
         }
 
