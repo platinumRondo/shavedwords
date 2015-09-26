@@ -4,7 +4,9 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of the dict protocol, client side.
@@ -87,22 +89,22 @@ public class DictClient {
         throw new DictException(result);
     }
 
-    public String showDatabases() throws IOException {
+    public Map<String, String> showDatabases() throws IOException {
         checkAndConnect();
         //TODO find better way to return dict with its own description
         sendCommand("show db");
         StatusResponse result = readStatusResponse();
         if (result.getCode() == 554)
-            return "";
+            return new HashMap<>();
         if (result.getCode() == 110) {
             String dbs = readTextualResponse();
             readStatusResponse();
-            return dbs;
+            return parseStringToMap(dbs);
         }
         throw new DictException(result);
     }
 
-    public String showStrategies() throws IOException {
+    public Map<String, String> showStrategies() throws IOException {
         checkAndConnect();
         //TODO find better way to return this
         sendCommand("show strat");
@@ -111,9 +113,19 @@ public class DictClient {
             //return: name description
             String strats = readTextualResponse();
             readStatusResponse();
-            return strats;
+            return parseStringToMap(strats);
         }
         throw new DictException(result);
+    }
+
+    private Map<String, String> parseStringToMap(String str) {
+        String[] lines = str.split("\n");
+        Map<String, String> map = new HashMap<>();
+        for (String line : lines) {
+            String[] parts = line.split(" ", 2);
+            map.put(parts[0], parts[1]);
+        }
+        return map;
     }
 
     public String showInfo(String database) throws IOException {
