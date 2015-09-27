@@ -29,7 +29,7 @@ public class DefineCard extends JPanel {
             sb.append("\n----------\n");
         }
         contentArea.setText(sb.toString());
-        scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMinimum());
-        scrollPane.getHorizontalScrollBar().setValue(scrollPane.getHorizontalScrollBar().getMinimum());
+        contentArea.setCaretPosition(0);
     }
+
 }
