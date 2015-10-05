@@ -7,6 +7,11 @@ public class StatusResponse {
     private final int code;
     private final String message;
 
+    /**
+     * Constructor.
+     *
+     * @param str the entire string provided by the server.
+     */
     public StatusResponse(String str) {
         code = Integer.decode(str.substring(0, 3));
         if (str.length() > 3)
