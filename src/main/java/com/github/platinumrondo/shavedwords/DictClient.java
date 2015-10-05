@@ -33,11 +33,12 @@ public class DictClient {
 
     /**
      * Connect to the server specified in the constructor.
-     *
+     * Throw an IllegalStateException if we are already connected.
      * @throws IOException something happened with the connection.
      */
     public void connect() throws IOException {
-        //TODO check if we are already connected
+        if (isConnected())
+            throw new IllegalStateException();
         serverSocket = new Socket(serverName, serverPort);
         serverIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream(), StandardCharsets.UTF_8));
         serverOut = new BufferedWriter(new OutputStreamWriter(serverSocket.getOutputStream(), StandardCharsets.UTF_8));
