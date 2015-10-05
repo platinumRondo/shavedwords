@@ -34,6 +34,7 @@ public class DictClient {
     /**
      * Connect to the server specified in the constructor.
      * Throw an IllegalStateException if we are already connected.
+     * Throw a DictException if the server refuse the connection.
      * @throws IOException something happened with the connection.
      */
     public void connect() throws IOException {
@@ -42,8 +43,12 @@ public class DictClient {
         serverSocket = new Socket(serverName, serverPort);
         serverIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream(), StandardCharsets.UTF_8));
         serverOut = new BufferedWriter(new OutputStreamWriter(serverSocket.getOutputStream(), StandardCharsets.UTF_8));
-        System.out.println(readStatusResponse());
-        //TODO disconnect if the server refuse our connection.
+        StatusResponse status = readStatusResponse();
+        System.out.println(status);
+        if (status.getCode() != 220) {
+            serverSocket.close();
+            throw new DictException(status);
+        }
     }
 
     /**
@@ -129,7 +134,6 @@ public class DictClient {
      */
     public Map<String, String> showDatabases() throws IOException {
         checkAndConnect();
-        //TODO find better way to return dict with its own description
         sendCommand("show db");
         StatusResponse result = readStatusResponse();
         if (result.getCode() == 554)
@@ -149,7 +153,6 @@ public class DictClient {
      */
     public Map<String, String> showStrategies() throws IOException {
         checkAndConnect();
-        //TODO find better way to return this
         sendCommand("show strat");
         StatusResponse result = readStatusResponse();
         if (result.getCode() == 111) {
