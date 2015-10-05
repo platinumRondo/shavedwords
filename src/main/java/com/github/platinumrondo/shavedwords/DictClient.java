@@ -3,10 +3,7 @@ package com.github.platinumrondo.shavedwords;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Implementation of the dict protocol, client side. For more information see http://www.dict.org .
@@ -15,6 +12,7 @@ import java.util.Map;
  * Except for the connect() method, every method match a protocol command.
  * If the server return an error, a DictException is raised.
  * If there's a connection problem, a IOException is raised.
+ *
  * @author platinum rondo
  */
 public class DictClient {
@@ -35,6 +33,7 @@ public class DictClient {
      * Connect to the server specified in the constructor.
      * Throw an IllegalStateException if we are already connected.
      * Throw a DictException if the server refuse the connection.
+     *
      * @throws IOException something happened with the connection.
      */
     public void connect() throws IOException {
@@ -53,6 +52,7 @@ public class DictClient {
 
     /**
      * Check if we are connected.
+     *
      * @return connection status.
      */
     public boolean isConnected() {
@@ -66,8 +66,9 @@ public class DictClient {
 
     /**
      * Ask the server for the definition of the word provided.
+     *
      * @param database the database in which the server should lookup.
-     * @param word the word.
+     * @param word     the word.
      * @return all the definitions returned; a empty array if no definition where found.
      * @throws IOException
      */
@@ -100,13 +101,14 @@ public class DictClient {
 
     /**
      * Find similar words to the one provided.
+     *
      * @param database the database where to look for.
      * @param strategy the strategy to use for the search.
-     * @param word the word (or part of it, or regex)
+     * @param word     the word (or part of it, or regex)
      * @return a list of possible words, or an empty string if nothing is found.
      * @throws IOException
      */
-    public String match(String database, String strategy, String word) throws IOException {
+    public Set<MatchResult> match(String database, String strategy, String word) throws IOException {
         if (database == null || strategy == null || word == null)
             throw new IllegalArgumentException();
         checkAndConnect();
@@ -115,10 +117,9 @@ public class DictClient {
         if (result.getCode() == 152) {
             String matchedWords = readTextualResponse();
             readStatusResponse();
-            //TODO this is shit! separate the words from the dictionary they're in and the other results.
-            return matchedWords;
+            return matchResponseToSet(matchedWords);
         } else if (result.getCode() == 552) {
-            return "";
+            return new HashSet<>();
         }
         //
         //550: wrong db
@@ -126,9 +127,22 @@ public class DictClient {
         throw new DictException(result);
     }
 
+    private Set<MatchResult> matchResponseToSet(String str) {
+        Set<MatchResult> resultSet = new HashSet<>();
+        String[] lines = str.split("\n");
+        for (String line : lines) {
+            int middleSpace = line.indexOf(' ');
+            String database = line.substring(0, middleSpace);
+            String word = removeDoubleQuotes(line.substring(middleSpace + 1));
+            resultSet.add(new MatchResult(word, database));
+        }
+        return resultSet;
+    }
+
     /**
      * Gives you the dictionary the server will let you use. Some server may have dictionary available only to
      * logged in users.
+     *
      * @return map providing the db name in the key, and its description as the value.
      * @throws IOException
      */
@@ -148,6 +162,7 @@ public class DictClient {
 
     /**
      * Gives you all the strategies supported by the server, to be used with the MATCH command.
+     *
      * @return map providing the strategy in the key and its description in the value.
      * @throws IOException
      */
@@ -184,6 +199,7 @@ public class DictClient {
 
     /**
      * Retrieve the information for the chosen database.
+     *
      * @param database the chosen one.
      * @return the info.
      * @throws IOException
@@ -204,6 +220,7 @@ public class DictClient {
 
     /**
      * Retrieve information on the server itself.
+     *
      * @return info.
      * @throws IOException
      */
@@ -218,6 +235,7 @@ public class DictClient {
 
     /**
      * Send to the server some information about the client, usually the name and the version.
+     *
      * @param text the text to send for identification.
      * @throws IOException
      */
@@ -234,6 +252,7 @@ public class DictClient {
     /**
      * Usually used for debugging purposes, ask the server for its status.
      * The answer is server dependent.
+     *
      * @return server status.
      * @throws IOException
      */
@@ -246,6 +265,7 @@ public class DictClient {
 
     /**
      * Retrieve the help guide of the server.
+     *
      * @return halp.
      * @throws IOException
      */
@@ -264,7 +284,8 @@ public class DictClient {
     /**
      * Authenticate the user. May unlock new dictionaries.
      * If the user is rejected, a DictException is raised.
-     * @param username the username
+     *
+     * @param username   the username
      * @param authstring an autentication string, a password.
      * @throws IOException
      */
@@ -279,6 +300,7 @@ public class DictClient {
 
     /**
      * Tell the server we're leaving.
+     *
      * @throws IOException
      */
     public void quit() throws IOException {

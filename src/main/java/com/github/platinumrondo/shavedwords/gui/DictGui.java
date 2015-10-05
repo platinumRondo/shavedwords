@@ -1,6 +1,7 @@
 package com.github.platinumrondo.shavedwords.gui;
 
 import com.github.platinumrondo.shavedwords.DictClient;
+import com.github.platinumrondo.shavedwords.MatchResult;
 import com.github.platinumrondo.shavedwords.gui.cards.DefineCard;
 import com.github.platinumrondo.shavedwords.gui.cards.LoadingCard;
 import com.github.platinumrondo.shavedwords.gui.cards.MatchCard;
@@ -11,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * The main gui/app.
@@ -46,8 +48,8 @@ public class DictGui extends JFrame {
                     if (client != null && client.isConnected())
                         client.quit();
                 } catch (IOException ex) {
-                    //TODO bad practice!
-                    System.err.println(ex);
+                    System.err.println("We got a IOException while closing the window.");
+                    ex.printStackTrace();
                 }
                 e.getWindow().dispose();
             }
@@ -149,7 +151,7 @@ public class DictGui extends JFrame {
         }
     }
 
-    private class MatchSearch extends SwingWorker<String[], Void> {
+    private class MatchSearch extends SwingWorker<Set<MatchResult>, Void> {
         private final String word;
         private final Component cmp;
 
@@ -160,17 +162,16 @@ public class DictGui extends JFrame {
         }
 
         @Override
-        protected String[] doInBackground() throws Exception {
+        protected Set<MatchResult> doInBackground() throws Exception {
             closeEnabled = false;
             connectToServerIfNecessary();
-            String match = client.match("*", "prefix", word);
-            return match.split("\n");
+            return client.match("*", "prefix", word);
         }
 
         @Override
         protected void done() {
             try {
-                String[] matchLines = get();
+                Set<MatchResult> matchLines = get();
                 matchCard.setList(matchLines);
                 cardLayout.show(contentPanel, MATCH_CARD);
             } catch (Exception e) {
