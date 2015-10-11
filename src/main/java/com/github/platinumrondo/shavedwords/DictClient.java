@@ -6,7 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * Implementation of the dict protocol, client side. For more information see http://www.dict.org .
+ * Implementation of the dict protocol, client side. For more information
+ * see http://www.dict.org .
  * This implementation isn't thread-safe, it must the synchronized externally.
  * The SASLAUTH command is missing.
  * Except for the connect() method, every method match a protocol command.
@@ -40,8 +41,12 @@ public class DictClient {
         if (isConnected())
             throw new IllegalStateException();
         serverSocket = new Socket(serverName, serverPort);
-        serverIn = new BufferedReader(new InputStreamReader(serverSocket.getInputStream(), StandardCharsets.UTF_8));
-        serverOut = new BufferedWriter(new OutputStreamWriter(serverSocket.getOutputStream(), StandardCharsets.UTF_8));
+        serverIn = new BufferedReader(
+                new InputStreamReader(serverSocket.getInputStream(),
+                        StandardCharsets.UTF_8));
+        serverOut = new BufferedWriter(
+                new OutputStreamWriter(serverSocket.getOutputStream(),
+                        StandardCharsets.UTF_8));
         StatusResponse status = readStatusResponse();
         System.out.println(status);
         if (status.getCode() != 220) {
@@ -56,7 +61,8 @@ public class DictClient {
      * @return connection status.
      */
     public boolean isConnected() {
-        return serverSocket != null && serverSocket.isConnected() && !serverSocket.isClosed();
+        return serverSocket != null && serverSocket.isConnected()
+                && !serverSocket.isClosed();
     }
 
     private void checkAndConnect() throws IOException {
@@ -69,10 +75,12 @@ public class DictClient {
      *
      * @param database the database in which the server should lookup.
      * @param word     the word.
-     * @return all the definitions returned; a empty array if no definition where found.
+     * @return all the definitions returned; a empty array if no definition
+     * where found.
      * @throws IOException
      */
-    public String[] define(String database, String word) throws IOException {
+    public DefineResult[] define(String database, String word)
+            throws IOException {
         if (database == null || word == null)
             throw new IllegalArgumentException();
         checkAndConnect();
@@ -81,22 +89,24 @@ public class DictClient {
         if (result.getCode() == 150) {
             return getDefinitions();
         } else if (result.getCode() == 552) {
-            return new String[0];
+            return new DefineResult[0];
         }
         //550: nonexistent db
         throw new DictException(result);
     }
 
-    private String[] getDefinitions() throws IOException {
+    private DefineResult[] getDefinitions() throws IOException {
         checkAndConnect();
-        List<String> l = new ArrayList<>();
+        List<DefineResult> l = new ArrayList<>();
         StatusResponse result = readStatusResponse();
         while (result.getCode() != 250) {
-            //TODO get from status the db in use
-            l.add(readTextualResponse());
+            String str = readTextualResponse();
+            DefineResult dr = new DefineResult(result.getParam(0),
+                    result.getParam(1), result.getParam(2), str);
+            l.add(dr);
             result = readStatusResponse();
         }
-        return l.toArray(new String[l.size()]);
+        return l.toArray(new DefineResult[l.size()]);
     }
 
     /**
@@ -108,7 +118,8 @@ public class DictClient {
      * @return a list of possible words, or an empty string if nothing is found.
      * @throws IOException
      */
-    public Set<MatchResult> match(String database, String strategy, String word) throws IOException {
+    public Set<MatchResult> match(String database, String strategy, String word)
+            throws IOException {
         if (database == null || strategy == null || word == null)
             throw new IllegalArgumentException();
         checkAndConnect();
@@ -140,10 +151,12 @@ public class DictClient {
     }
 
     /**
-     * Gives you the dictionary the server will let you use. Some server may have dictionary available only to
+     * Gives you the dictionary the server will let you use. Some server may
+     * have dictionary available only to
      * logged in users.
      *
-     * @return map providing the db name in the key, and its description as the value.
+     * @return map providing the db name in the key, and its description as the
+     * value.
      * @throws IOException
      */
     public Map<String, String> showDatabases() throws IOException {
@@ -161,9 +174,11 @@ public class DictClient {
     }
 
     /**
-     * Gives you all the strategies supported by the server, to be used with the MATCH command.
+     * Gives you all the strategies supported by the server, to be used with the
+     * MATCH command.
      *
-     * @return map providing the strategy in the key and its description in the value.
+     * @return map providing the strategy in the key and its description in the
+     * value.
      * @throws IOException
      */
     public Map<String, String> showStrategies() throws IOException {
@@ -234,7 +249,8 @@ public class DictClient {
     }
 
     /**
-     * Send to the server some information about the client, usually the name and the version.
+     * Send to the server some information about the client, usually the name
+     * and the version.
      *
      * @param text the text to send for identification.
      * @throws IOException
