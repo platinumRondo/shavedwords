@@ -9,7 +9,7 @@ import java.awt.*;
  * Show the definition(s) of the word searched.
  */
 public class DefineCard extends JPanel {
-    private JTextArea contentArea;
+    private JEditorPane contentArea;
     private JScrollPane scrollPane;
 
     public DefineCard() {
@@ -18,7 +18,8 @@ public class DefineCard extends JPanel {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        contentArea = new JTextArea();
+        contentArea = new JEditorPane();
+        contentArea.setContentType("text/html");
         contentArea.setEditable(false);
         scrollPane = new JScrollPane(contentArea);
         add(scrollPane, BorderLayout.CENTER);
@@ -26,9 +27,13 @@ public class DefineCard extends JPanel {
 
     public void setContent(DefineResult[] strs) {
         StringBuilder sb = new StringBuilder();
+        sb.append("<html>");
         for (DefineResult s : strs) {
-            sb.append(s.getDefinition());
-            sb.append("\n----------\n");
+            sb.append("<b>");
+            sb.append(s.getWord());
+            sb.append("</b><br/>");
+            sb.append(s.getDefinition().replace("\n", "<br/>"));
+            sb.append("<br/><hr/><br/>");
         }
         contentArea.setText(sb.toString());
         contentArea.setCaretPosition(0);
