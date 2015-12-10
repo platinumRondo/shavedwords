@@ -7,6 +7,7 @@ import com.github.platinumrondo.shavedwords.gui.cards.DefineCard;
 import com.github.platinumrondo.shavedwords.gui.cards.LoadingCard;
 import com.github.platinumrondo.shavedwords.gui.cards.MatchCard;
 
+import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -114,7 +115,7 @@ public class DictGui extends JFrame {
         }
     }
 
-    private class DefineSearch extends SwingWorker<DefineResult[], Void> {
+    private class DefineSearch extends SwingWorker<List<DefineResult>, Void> {
         private final String word;
         private final Component cmp;
 
@@ -125,7 +126,7 @@ public class DictGui extends JFrame {
         }
 
         @Override
-        protected DefineResult[] doInBackground() throws Exception {
+        protected List<DefineResult> doInBackground() throws Exception {
             closeEnabled = false;
             connectToServerIfNecessary();
             return client.define("*", word);
@@ -134,8 +135,8 @@ public class DictGui extends JFrame {
         @Override
         protected void done() {
             try {
-                DefineResult[] strs = get();
-                if (strs.length == 0) {
+                List<DefineResult> strs = get();
+                if (strs.isEmpty()) {
                     System.out.println("DefineSearch: no results...");
                     new MatchSearch(cmp, word).execute();
                 } else {

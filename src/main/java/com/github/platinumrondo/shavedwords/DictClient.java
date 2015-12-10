@@ -79,7 +79,7 @@ public class DictClient {
      * where found.
      * @throws IOException
      */
-    public DefineResult[] define(String database, String word)
+    public List<DefineResult> define(String database, String word)
             throws IOException {
         if (database == null || word == null)
             throw new IllegalArgumentException();
@@ -89,13 +89,13 @@ public class DictClient {
         if (result.getCode() == 150) {
             return getDefinitions();
         } else if (result.getCode() == 552) {
-            return new DefineResult[0];
+            return Collections.emptyList();
         }
         //550: nonexistent db
         throw new DictException(result);
     }
 
-    private DefineResult[] getDefinitions() throws IOException {
+    private List<DefineResult> getDefinitions() throws IOException {
         checkAndConnect();
         List<DefineResult> l = new ArrayList<>();
         StatusResponse result = readStatusResponse();
@@ -106,7 +106,7 @@ public class DictClient {
             l.add(dr);
             result = readStatusResponse();
         }
-        return l.toArray(new DefineResult[l.size()]);
+        return Collections.unmodifiableList(l);
     }
 
     /**

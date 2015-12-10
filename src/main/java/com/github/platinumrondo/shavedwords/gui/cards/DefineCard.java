@@ -2,6 +2,7 @@ package com.github.platinumrondo.shavedwords.gui.cards;
 
 import com.github.platinumrondo.shavedwords.DefineResult;
 
+import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 
@@ -25,7 +26,7 @@ public class DefineCard extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    public void setContent(DefineResult[] strs) {
+    public void setContent(List<DefineResult> strs) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         for (DefineResult s : strs) {
