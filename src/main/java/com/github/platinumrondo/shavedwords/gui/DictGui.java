@@ -26,10 +26,10 @@ public class DictGui extends JFrame {
     private JTextField searchField;
     private JPanel contentPanel;
     private CardLayout cardLayout;
-    //CARD s
+    // CARD s
     private DefineCard defineCard;
     private MatchCard matchCard;
-    //dict client
+    // dict client
     private DictClient client;
     private boolean closeEnabled;
 
@@ -37,7 +37,7 @@ public class DictGui extends JFrame {
         initComponents();
         setSize(500, 400);
         setTitle("shavedwords");
-        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         closeEnabled = true;
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -49,7 +49,8 @@ public class DictGui extends JFrame {
                     if (client != null && client.isConnected())
                         client.quit();
                 } catch (IOException ex) {
-                    System.err.println("We got a IOException while closing the window.");
+                    System.err.println(
+                            "We got a IOException while closing the window.");
                     ex.printStackTrace();
                 }
                 e.getWindow().dispose();
@@ -95,11 +96,11 @@ public class DictGui extends JFrame {
     private void lockAndSearch() {
         searchField.getAction().setEnabled(false);
         String text = searchField.getText();
-        if (text.trim().compareTo("") == 0) {
+        if (text.trim().isEmpty()) {
             searchField.getAction().setEnabled(true);
             return;
         }
-        //send search
+        // send search
         cardLayout.show(contentPanel, LOADING_CARD);
         new DefineSearch(this, text).execute();
     }
