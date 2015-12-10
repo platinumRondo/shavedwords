@@ -220,7 +220,7 @@ public class DictClient {
      * @throws IOException
      */
     public String showInfo(String database) throws IOException {
-        if (database == null || database.trim().compareTo("") == 0)
+        if (database == null || database.trim().isEmpty())
             throw new IllegalArgumentException();
         checkAndConnect();
         sendCommand("show info", database);
@@ -256,7 +256,7 @@ public class DictClient {
      * @throws IOException
      */
     public void client(String text) throws IOException {
-        if (text == null || text.trim().compareTo("") == 0)
+        if (text == null || text.trim().isEmpty())
             throw new IllegalArgumentException();
         checkAndConnect();
         sendCommand("client", text);
